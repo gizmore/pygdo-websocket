@@ -7,6 +7,9 @@ from gdo.base.Message import Message
 from gdo.core.Connector import Connector
 
 from typing import TYPE_CHECKING
+
+from gdo.core.GDO_Session import GDO_Session
+
 if TYPE_CHECKING:
     from gdo.websocket.module_websocket import module_websocket
 
@@ -37,6 +40,8 @@ class Websocket(Connector):
 
     async def handler(self, ws):
         async for msg in ws:
+            if msg[0] == 1:
+                GDO_Session.s
             await ws.send(f"echo: {msg}")
 
     async def gdo_send_to_user(self, msg: Message, notice: bool=False):
