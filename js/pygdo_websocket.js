@@ -1,29 +1,49 @@
 "use strict"
-window.GDO.ws = {
+window.gdo.ws = {
 
     ws: null,
     tls: 0,
     autoconnect: 0,
+    connecting: null,
+    proto: null,
+
+    load: function() {
+        window.gdo.fetch('websocket', 'protocol').then(function(data) {
+            window.gdo.ws.init();
+        });
+    },
 
     init: function() {
-        debugger;
-        const proto = window.GDO.ws.tls ? 'wss' : 'ws';
-        const wsUri = proto + "://" + window.GDO.ws.ip + ":" + window.GDO.ws.port + "/";
-        const ws = window.GDO.ws.ws = new WebSocket(wsUri);
+        window.gdo.ws.connecting = setInterval(window.gdo.ws.connect, 5000);
+        window.gdo.ws.connect();
+    },
+
+    connect: function() {
+        const proto = window.gdo.ws.tls ? 'wss' : 'ws';
+        const wsUri = proto + "://" + window.gdo.ws.ip + ":" + window.gdo.ws.port + "/";
+        const ws = window.gdo.ws.ws = new WebSocket(wsUri);
         ws.addEventListener("open", () => {
-            window.GDO.ws.sendAuth();
+            clearInterval(window.gdo.ws.connecting);
+            window.gdo.ws.sendAuth();
         });
-        ws.addEventListener("error", (e) => {
-            console.log(e)
+        ws.addEventListener("close", () => {
+            window.gdo.ws.ws = null;
+            window.gdo.ws.connecting = setInterval(window.gdo.ws.connect, 5000);
+            window.gdo.ws.connect();
         });
         ws.addEventListener("message", (e) => {
-            log(`RECEIVED: ${e.data}`);
+            console.log(e);
+        });
+        ws.addEventListener("error", (e) => {
+            console.error(e)
         });
     },
     sendAuth: function() {
-        window.GDO.ws.send("HI!")
+        window.gdo.ws.send(window.gdo.ws.cookie);
     },
     send: function(data) {
-        window.GDO.ws.ws.send(JSON.stringify(data));
+        window.gdo.ws.ws.send(JSON.stringify(data));
     },
 };
+
+document.addEventListener('DOMContentLoaded', window.gdo.ws.load);

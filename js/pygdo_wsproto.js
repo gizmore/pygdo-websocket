@@ -1,0 +1,3 @@
+window.gdo.ws.proto = {
+};
+

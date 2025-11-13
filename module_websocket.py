@@ -1,6 +1,9 @@
+from gdo.base.Application import Application
 from gdo.base.GDO_Module import GDO_Module
 from gdo.base.GDT import GDT
 from gdo.core.Connector import Connector
+from gdo.core.GDO_Session import GDO_Session
+from gdo.core.GDO_User import GDO_User
 from gdo.core.GDT_Bool import GDT_Bool
 from gdo.core.GDT_Path import GDT_Path
 from gdo.net.GDT_IP import GDT_IP
@@ -52,6 +55,6 @@ class module_websocket(GDO_Module):
 
     def gdo_load_scripts(self, page: 'GDT_Page'):
         self.add_js('js/pygdo_websocket.js')
-        self.add_js_inline("window.GDO.ws.tls = "+str(int(self.cfg_tls()))+";\nwindow.GDO.ws.ip = '"+self.cfg_ip()+"';\nwindow.GDO.ws.port = "+str(self.cfg_port())+";")
-        if self.cfg_auto_connect():
-            self.add_js_inline("window.GDO.ws.init();")
+        self.add_js_inline("window.gdo.ws.tls = "+str(int(self.cfg_tls()))+";\nwindow.gdo.ws.ip = '"+self.cfg_ip()+"';\nwindow.gdo.ws.port = "+str(self.cfg_port())+";\nwindow.gdo.ws.cookie = '"+Application.get_cookie(GDO_Session.COOKIE_NAME)+"';")
+        if self.cfg_auto_connect() and GDO_User.current().is_user():
+            self.add_js_inline("window.gdo.ws.init();")
