@@ -1,38 +1,35 @@
 import asyncio
 import ssl
 
-from websockets.server import serve
+from websocket_server import WebsocketServer, WebSocketHandler
+from websockets.asyncio.server import serve
 
 from gdo.base.Application import Application
 from gdo.base.Logger import Logger
 from gdo.base.Message import Message
 from gdo.base.Render import Mode
+from gdo.base.Thread import Thread
 from gdo.core.Connector import Connector
 
 from typing import TYPE_CHECKING
 
 from gdo.core.GDO_Session import GDO_Session
+from gdo.core.GDO_User import GDO_User
 
 if TYPE_CHECKING:
     from gdo.websocket.module_websocket import module_websocket
 
 
-async def handler(ws):
-    try:
-        async for msg in ws:
-            if msg[0].isdigit():
-                session = GDO_Session.for_cookie(msg)
-                user = session.get_user()
-                Application.set_current_user(user)
-                user._network_user = ws
-                ws._gdo_user = user
-                await ws.send("AUTHENTICATED!")
-            message = Message(msg, Mode.HTML).env_user(ws._gdo_user).env_server(self._server).env_session(ws._gdo_user._session).env_mode(Mode.HTML)
-            Application.MESSAGES.put(message)
-    except Exception as e:
-        Logger.exception(e)
-
 class Websocket(Connector):
+
+    ws: WebsocketServer
+    handlers: dict[str,GDO_User]
+    inited: bool
+
+    def __init__(self):
+        super().__init__()
+        self.handlers = {}
+        self.inited = False
 
     def module_websocket(self) -> 'module_websocket':
         from gdo.websocket.module_websocket import module_websocket
@@ -40,7 +37,7 @@ class Websocket(Connector):
 
     async def gdo_connect(self) -> bool:
         self._connected = True
-        asyncio.create_task(self.mainloop(), name='websocket')
+        await self.mainloop()
         return True
 
     async def gdo_disconnect(self) -> bool:
@@ -48,13 +45,47 @@ class Websocket(Connector):
 
     async def mainloop(self):
         mod = self.module_websocket()
-        ssl_context = None
-        if mod.cfg_tls():
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            ssl_context.load_cert_chain(certfile=mod.cfg_tls_cert_path(),
-                                        keyfile=mod.cfg_tls_key_path())
-        async with serve(handler, mod.cfg_ip(), mod.cfg_port(), ssl=ssl_context):
-            await asyncio.Future()
+        tls = mod.cfg_tls()
+        server = WebsocketServer(host=mod.cfg_host(), port=mod.cfg_port(), cert=mod.cfg_tls_cert_path() if tls else None, key=mod.cfg_tls_key_path() if tls else None)
+        server.set_fn_new_client(self.new_client)
+        server.set_fn_message_received(self.handler)
+        server.set_fn_client_left(self.client_left)
+        self._connected = True
+        self.ws = server
+        server.run_forever(False)
+        return True
+
+    def new_client(self, address, ws):
+        if not self.inited:
+            Application.init_thread(self.ws.thread)
+            self.inited = True
+
+    def client_left(self, address, ws):
+        user = self.get_user_by_address(address)
+        user._network_user = None
+        del self.handlers[user.get_id()]
+
+    def handler(self, address, ws, msg):
+        wsh: WebSocketHandler = address['handler']
+        if not hasattr(wsh, 'gdo_user'):
+            session = GDO_Session.for_cookie(msg)
+            user = session.get_user()
+            Application.set_current_user(user)
+            wsh.gdo_user = user
+            user._network_user = wsh
+            self.handlers[user] = user
+            wsh.send_message('0:msg_authed')
+        else:
+            user = wsh.gdo_user
+            Application.set_current_user(user)
+            message = Message(msg, Mode.HTML).env_user(user, True).env_server(self._server).env_mode(Mode.HTML)
+            Application.MESSAGES.put(message)
 
     async def gdo_send_to_user(self, msg: Message, notice: bool=False):
         await msg._env_user._network_user.send(msg._message)
+
+    def get_user_by_address(self, address: dict) -> GDO_User|None:
+        for user in self.handlers.values():
+            if user._network_user == address['handler']:
+                return user
+        return None

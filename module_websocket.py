@@ -6,7 +6,7 @@ from gdo.core.GDO_Session import GDO_Session
 from gdo.core.GDO_User import GDO_User
 from gdo.core.GDT_Bool import GDT_Bool
 from gdo.core.GDT_Path import GDT_Path
-from gdo.net.GDT_IP import GDT_IP
+from gdo.net.GDT_Host import GDT_Host
 from gdo.net.GDT_Port import GDT_Port
 from gdo.ui.GDT_Page import GDT_Page
 from gdo.websocket.connector.Websocket import Websocket
@@ -20,7 +20,7 @@ class module_websocket(GDO_Module):
 
     def gdo_module_config(self) -> list[GDT]:
         return [
-            GDT_IP('ws_ip').not_null().initial('127.0.0.1'),
+            GDT_Host('ws_host').not_null().initial('127.0.0.1'),
             GDT_Port('ws_port').not_null().initial('61221'),
             GDT_Bool('ws_tls').not_null().initial('0'),
             GDT_Path('ws_tls_key').existing_file(),
@@ -28,8 +28,8 @@ class module_websocket(GDO_Module):
             GDT_Bool('ws_autoconnect').not_null().initial('1'),
         ]
 
-    def cfg_ip(self) -> str:
-        return self.get_config_val('ws_ip')
+    def cfg_host(self) -> str:
+        return self.get_config_val('ws_host')
 
     def cfg_port(self) -> int:
         return self.get_config_value('ws_port')
@@ -55,6 +55,9 @@ class module_websocket(GDO_Module):
 
     def gdo_load_scripts(self, page: 'GDT_Page'):
         self.add_js('js/pygdo_websocket.js')
-        self.add_js_inline("window.gdo.ws.tls = "+str(int(self.cfg_tls()))+";\nwindow.gdo.ws.ip = '"+self.cfg_ip()+"';\nwindow.gdo.ws.port = "+str(self.cfg_port())+";\nwindow.gdo.ws.cookie = '"+Application.get_cookie(GDO_Session.COOKIE_NAME)+"';")
+        self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_port()) + ";\nwindow.gdo.ws.cookie = '" + Application.get_cookie(GDO_Session.COOKIE_NAME) + "';")
         if self.cfg_auto_connect() and GDO_User.current().is_user():
-            self.add_js_inline("window.gdo.ws.init();")
+            self.autoconnect_script()
+
+    def autoconnect_script(self):
+        self.add_js_inline("window.gdo.ws.init();")
