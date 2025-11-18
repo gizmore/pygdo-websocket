@@ -51,7 +51,7 @@ class module_websocket(GDO_Module):
     # Init #
     ########
 
-    def gdo_install(self):
+    async def gdo_install(self):
         if not GDO_Server.get_by_connector('websocket'):
             GDO_Server.blank({
                 'serv_name': 'ws',
