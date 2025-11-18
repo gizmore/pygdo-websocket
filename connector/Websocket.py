@@ -78,7 +78,7 @@ class Websocket(Connector):
         else:
             user = wsh.gdo_user
             Application.set_current_user(user)
-            message = Message(msg, Mode.html).env_user(user, True).env_server(self._server).env_mode(Mode.html)
+            message = Message(msg, Mode.render_html).env_user(user, True).env_server(self._server).env_mode(Mode.render_html)
             Application.MESSAGES.put(message)
 
     async def gdo_send_to_user(self, msg: Message, notice: bool=False):
