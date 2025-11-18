@@ -1,6 +1,7 @@
 from gdo.base.Application import Application
 from gdo.base.GDO_Module import GDO_Module
 from gdo.base.GDT import GDT
+from gdo.core.GDO_Server import GDO_Server
 from gdo.core.Connector import Connector
 from gdo.core.GDO_Session import GDO_Session
 from gdo.core.GDO_User import GDO_User
@@ -49,6 +50,13 @@ class module_websocket(GDO_Module):
     ########
     # Init #
     ########
+
+    def gdo_install(self):
+        if not GDO_Server.get_by_connector('websocket'):
+            GDO_Server.blank({
+                'serv_name': 'ws',
+                'serv_connector': 'websocket',
+            }).insert()
 
     def gdo_init(self):
         Connector.register(Websocket)
