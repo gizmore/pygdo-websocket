@@ -1,14 +1,10 @@
 import asyncio
-import ssl
 
 from websocket_server import WebsocketServer, WebSocketHandler
-from websockets.asyncio.server import serve
 
 from gdo.base.Application import Application
-from gdo.base.Logger import Logger
 from gdo.base.Message import Message
 from gdo.base.Render import Mode
-from gdo.base.Thread import Thread
 from gdo.core.Connector import Connector
 
 from typing import TYPE_CHECKING
@@ -37,7 +33,7 @@ class Websocket(Connector):
 
     async def gdo_connect(self) -> bool:
         self._connected = True
-        await self.mainloop()
+        asyncio.run(self.mainloop())
         return True
 
     async def gdo_disconnect(self) -> bool:
