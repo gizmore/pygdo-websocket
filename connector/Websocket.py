@@ -48,7 +48,7 @@ class Websocket(Connector):
         server.set_fn_client_left(self.client_left)
         self._connected = True
         self.ws = server
-        server.run_forever(False)
+        server.run_forever(True)
         return True
 
     def new_client(self, address, ws):
