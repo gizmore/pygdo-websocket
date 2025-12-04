@@ -21,8 +21,8 @@ class protocol(Method):
         }
         for module in ModuleLoader.instance()._enabled:
             for gdo in module.gdo_classes():
-                protocol['gdo'][gdo.fqcn()] = [gdt.render_json() for gdt in gdo.table().columns()]
-                for gdt in gdo.table().columns():
+                protocol['gdo'][gdo.fqcn()] = [gdt.render_json() for gdt in gdo.table().columns().values()]
+                for gdt in gdo.table().columns().values():
                     protocol['gdt'][gdt.fqcn()] = gdt.render_json()
         # TODO All methods
         return GDT_Dict(protocol)
