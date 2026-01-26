@@ -36,8 +36,10 @@ class Websocket(Connector):
         asyncio.run(self.mainloop())
         return True
 
-    async def gdo_disconnect(self) -> bool:
-        pass
+    async def gdo_disconnect(self, quit_message: str) -> bool:
+        self._connected = False
+        await self.broadcast(quit_message)
+        return True
 
     async def mainloop(self):
         mod = self.module_websocket()
@@ -79,6 +81,10 @@ class Websocket(Connector):
 
     async def gdo_send_to_user(self, msg: Message, notice: bool=False):
         await msg._env_user._network_user.send(msg._message)
+
+    async def broadcast(self, msg: str):
+        for user in self.handlers.values():
+            await user._network_user.send(msg)
 
     def get_user_by_address(self, address: dict) -> GDO_User|None:
         for user in self.handlers.values():
