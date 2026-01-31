@@ -33,7 +33,8 @@ class Websocket(Connector):
 
     async def gdo_connect(self) -> bool:
         self._connected = True
-        asyncio.run(self.mainloop())
+        asyncio.create_task(self.mainloop())
+        # asyncio.run(self.mainloop())
         return True
 
     async def gdo_disconnect(self, quit_message: str) -> bool:
