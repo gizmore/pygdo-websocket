@@ -1,1 +1,2 @@
 module_websocket = "Websocket"
+help_ws_connect = "Go the Websocket page"
