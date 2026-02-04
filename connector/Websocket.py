@@ -5,6 +5,7 @@ from websocket_server import WebsocketServer, WebSocketHandler
 from gdo.base.Application import Application
 from gdo.base.Message import Message
 from gdo.base.Render import Mode
+from gdo.base.Trans import t
 from gdo.core.Connector import Connector
 
 from typing import TYPE_CHECKING
@@ -26,6 +27,9 @@ class Websocket(Connector):
         super().__init__()
         self.handlers = {}
         self.inited = False
+
+    def render_user_connect_help(self) -> str:
+        return t('help_ws_connect')
 
     def module_websocket(self) -> 'module_websocket':
         from gdo.websocket.module_websocket import module_websocket
