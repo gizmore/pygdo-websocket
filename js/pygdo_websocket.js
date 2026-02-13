@@ -16,6 +16,19 @@ window.gdo.ws = {
     },
 
     init: function() {
+        document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
+        let submit = document.getElementById('gdo.websocket.method.raw.raw_submit');
+        if(submit) {
+            submit.addEventListener('click', function(e) {
+                e.preventDefault();
+                let line = document.getElementById('ws_cmdline');
+                if(line) {
+                    gdo.ws.send(line.value)
+                    line.value = '';
+                }
+                return false;
+            });
+        }
         window.gdo.ws.connect();
     },
 
@@ -60,16 +73,5 @@ window.gdo.ws = {
         }
         window.gdo.ws.ws.send(data);
     },
+
 };
-
-document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
-
-document.getElementById('gdo.websocket.method.raw.raw_submit').addEventListener('click', function(e) {
-    e.preventDefault();
-    let line = document.getElementById('ws_cmdline');
-    if(line) {
-        gdo.ws.send(line.value)
-        line.value = '';
-    }
-    return false;
-});
