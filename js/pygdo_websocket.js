@@ -36,7 +36,13 @@ window.gdo.ws = {
             window.gdo.ws.connect();
         });
         ws.addEventListener("message", (e) => {
-            console.log(e);
+            let log = document.getElementById('ws_log');
+            if(log) {
+                log.innerText += e.data;
+                log.innerText += "\n";
+            } else {
+                 console.log(e.data);
+            }
         });
         ws.addEventListener("error", (e) => {
             console.error(e)
@@ -46,8 +52,20 @@ window.gdo.ws = {
         window.gdo.ws.send(window.gdo.ws.cookie);
     },
     send: function(data) {
-        window.gdo.ws.ws.send(JSON.stringify(data));
+        let log = document.getElementById('ws_log');
+        if(log) {
+            log.innerText += " > "
+            log.innerText += data;
+            log.innerText += "\n";
+        }
+        window.gdo.ws.ws.send(data);
     },
 };
 
 document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
+
+document.getElementById('gdo.websocket.method.raw.raw_submit').addEventListener('click', function(e) {
+    e.preventDefault();
+    gdo.ws.send(document.getElementById('ws_cmdline').value)
+    return false;
+});

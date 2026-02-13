@@ -1,8 +1,12 @@
 import asyncio
+import threading
+from asyncio import AbstractEventLoop
 
+import msgspec.json
 from websocket_server import WebsocketServer, WebSocketHandler
 
 from gdo.base.Application import Application
+from gdo.base.Logger import Logger
 from gdo.base.Message import Message
 from gdo.base.Render import Mode
 from gdo.base.Trans import t
@@ -49,6 +53,7 @@ class Websocket(Connector):
     async def mainloop(self):
         mod = self.module_websocket()
         tls = mod.cfg_tls()
+        Logger.debug(f'Listening for websocket connections on {mod.cfg_host()}:{mod.cfg_port()}')
         server = WebsocketServer(host=mod.cfg_host(), port=mod.cfg_port(), cert=mod.cfg_tls_cert_path() if tls else None, key=mod.cfg_tls_key_path() if tls else None)
         server.set_fn_new_client(self.new_client)
         server.set_fn_message_received(self.handler)
@@ -59,17 +64,22 @@ class Websocket(Connector):
         return True
 
     def new_client(self, address, ws):
-        if not self.inited:
-            Application.init_thread(self.ws.thread)
-            self.inited = True
+        Logger.debug(f'New client on {address}')
+        Logger.debug(f'New client on {ws}')
+        wsh: WebSocketHandler = address['handler']
+        Application.init_thread(threading.current_thread())
 
     def client_left(self, address, ws):
-        user = self.get_user_by_address(address)
-        user._network_user = None
-        del self.handlers[user.get_id()]
-
-    def handler(self, address, ws, msg):
+        Logger.debug(f'Client left: {address}')
         wsh: WebSocketHandler = address['handler']
+        Application.init_thread(threading.current_thread())
+        if hasattr(wsh, 'gdo_user'):
+            user = wsh.gdo_user
+            del self.handlers[user]
+
+    def handler(self, address, ws, msg: str):
+        wsh: WebSocketHandler = address['handler']
+        Application.init_thread(threading.current_thread())
         if not hasattr(wsh, 'gdo_user'):
             session = GDO_Session.for_cookie(msg)
             user = session.get_user()
@@ -77,22 +87,26 @@ class Websocket(Connector):
             wsh.gdo_user = user
             user._network_user = wsh
             self.handlers[user] = user
-            wsh.send_message('0:msg_authed')
+            wsh.send_message(t('msg_welcome_ws', (user.render_name(),)))
         else:
             user = wsh.gdo_user
+            Logger.debug(f'WS << {user.render_name()} << {msg}')
+            Application.tick()
+            Application.init_common()
             Application.set_current_user(user)
             message = Message(msg, Mode.render_html).env_user(user, True).env_server(self._server).env_mode(Mode.render_html)
             Application.MESSAGES.put(message)
 
     async def gdo_send_to_user(self, msg: Message, notice: bool=False):
-        await msg._env_user._network_user.send(msg._message)
+        Logger.debug(f'WS >> {msg._env_user.render_name()} >> {msg._result}')
+        msg._env_user._network_user.send_message(msg._result)
 
     async def broadcast(self, msg: str):
         for user in self.handlers.values():
-            await user._network_user.send(msg)
+            user._network_user.send_message(msg)
 
-    def get_user_by_address(self, address: dict) -> GDO_User|None:
-        for user in self.handlers.values():
-            if user._network_user == address['handler']:
-                return user
-        return None
+    # def get_user_by_address(self, address: dict) -> GDO_User|None:
+    #     for user in self.handlers.values():
+    #         if user._network_user == address['handler']:
+    #             return user
+    #     return None

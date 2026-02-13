@@ -9,7 +9,10 @@ from gdo.core.GDT_Bool import GDT_Bool
 from gdo.core.GDT_Path import GDT_Path
 from gdo.net.GDT_Host import GDT_Host
 from gdo.net.GDT_Port import GDT_Port
+from gdo.shadowdogs.GDT_Location import GDT_Location
+from gdo.ui.GDT_Link import GDT_Link
 from gdo.ui.GDT_Page import GDT_Page
+from gdo.ui.GDT_PageLocation import GDT_PageLocation
 from gdo.websocket.connector.Websocket import Websocket
 
 
@@ -27,6 +30,8 @@ class module_websocket(GDO_Module):
             GDT_Path('ws_tls_key').existing_file(),
             GDT_Path('ws_tls_cert').existing_file(),
             GDT_Bool('ws_autoconnect').not_null().initial('1'),
+            GDT_Bool('ws_raw').not_null().initial('1'),
+            GDT_PageLocation('ws_raw_location').initial('_left_bar'),
         ]
 
     def cfg_host(self) -> str:
@@ -63,9 +68,14 @@ class module_websocket(GDO_Module):
 
     def gdo_load_scripts(self, page: 'GDT_Page'):
         self.add_js('js/pygdo_websocket.js')
+        self.add_css('css/pygdo_websocket.css')
         self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_port()) + ";\nwindow.gdo.ws.cookie = '" + Application.get_cookie(GDO_Session.COOKIE_NAME) + "';")
         if self.cfg_auto_connect() and GDO_User.current().is_user():
             self.autoconnect_script()
 
     def autoconnect_script(self):
         self.add_js_inline("window.gdo.ws.init();")
+
+    def gdo_init_sidebar(self, page: 'GDT_Page'):
+        if self.get_config_value('ws_raw'):
+            self.get_config_value('ws_raw_location').add_field(GDT_Link().href(self.href('raw')).text('module_websocket'))

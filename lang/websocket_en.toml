@@ -1,2 +1,5 @@
 module_websocket = "Websocket"
 help_ws_connect = "Go the Websocket page"
+
+mt_websocket_raw = "WebSocket Command"
+md_websocket_raw = "Talk raw to the websocket connector."
