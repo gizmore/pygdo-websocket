@@ -38,8 +38,8 @@ window.gdo.ws = {
         ws.addEventListener("message", (e) => {
             let log = document.getElementById('ws_log');
             if(log) {
-                log.innerText += e.data;
-                log.innerText += "\n";
+                log.innerHTML += e.data;
+                log.innerHTML += "\n";
             } else {
                  console.log(e.data);
             }
@@ -66,6 +66,10 @@ document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
 
 document.getElementById('gdo.websocket.method.raw.raw_submit').addEventListener('click', function(e) {
     e.preventDefault();
-    gdo.ws.send(document.getElementById('ws_cmdline').value)
+    let line = document.getElementById('ws_cmdline');
+    if(line) {
+        gdo.ws.send(line.value)
+        line.value = '';
+    }
     return false;
 });

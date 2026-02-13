@@ -3,3 +3,6 @@ help_ws_connect = "Go the Websocket page"
 
 mt_websocket_raw = "WebSocket Command"
 md_websocket_raw = "Talk raw to the websocket connector."
+msg_welcome_ws = "Hello %s and welcome to the PyGDO Websocket Connector. Try $help."
+info_websocket_raw = "Hier kannst du GDO Befehle zusammenbauen. Versuche `$help` oder `$echo 1 $(calc 1 + 2) 3 $(calc 3 + 4)`."
+ws_cmdline = "Text-Befehl"
