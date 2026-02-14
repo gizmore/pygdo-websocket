@@ -16,7 +16,6 @@ window.gdo.ws = {
     },
 
     init: function() {
-        document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
         let submit = document.getElementById('gdo.websocket.method.raw.raw_submit');
         if(submit) {
             submit.addEventListener('click', function(e) {
@@ -75,3 +74,5 @@ window.gdo.ws = {
     },
 
 };
+
+document.addEventListener('DOMContentLoaded', window.gdo.ws.load);

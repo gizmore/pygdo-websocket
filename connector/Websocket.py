@@ -32,6 +32,9 @@ class Websocket(Connector):
         self.handlers = {}
         self.inited = False
 
+    def get_render_mode(self) -> Mode:
+        return Mode.render_html
+
     def render_user_connect_help(self) -> str:
         return t('help_ws_connect')
 
@@ -104,9 +107,3 @@ class Websocket(Connector):
     async def broadcast(self, msg: str):
         for user in self.handlers.values():
             user._network_user.send_message(msg)
-
-    # def get_user_by_address(self, address: dict) -> GDO_User|None:
-    #     for user in self.handlers.values():
-    #         if user._network_user == address['handler']:
-    #             return user
-    #     return None

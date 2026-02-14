@@ -29,6 +29,5 @@ class raw(MethodForm):
         )
 
     def form_submitted(self) -> GDT:
-        GDT_Page._js_inline += '<script>alert(1);</script>'
         return self.msg('msg_ws_raw_sent')
     
