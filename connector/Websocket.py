@@ -84,7 +84,7 @@ class Websocket(Connector):
         wsh: WebSocketHandler = address['handler']
         Application.init_thread(threading.current_thread())
         if not hasattr(wsh, 'gdo_user'):
-            session = GDO_Session.for_cookie(msg)
+            session = GDO_Session.for_cookie(msg, False)
             user = session.get_user()
             Application.set_current_user(user)
             wsh.gdo_user = user
