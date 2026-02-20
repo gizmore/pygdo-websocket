@@ -1,6 +1,5 @@
 "use strict"
 
-
 window.gdo.ws = {
 
     ws: null,
@@ -9,7 +8,7 @@ window.gdo.ws = {
     connecting: null,
     proto: null,
 
-    load: function() {
+    gdo_init: function() {
         window.gdo.fetch('websocket', 'protocol').then(function(data) {
             window.gdo.ws.init();
         });
@@ -74,5 +73,3 @@ window.gdo.ws = {
     },
 
 };
-
-document.addEventListener('DOMContentLoaded', window.gdo.ws.load);
