@@ -9,7 +9,6 @@ from gdo.core.GDT_Bool import GDT_Bool
 from gdo.core.GDT_Path import GDT_Path
 from gdo.net.GDT_Host import GDT_Host
 from gdo.net.GDT_Port import GDT_Port
-from gdo.shadowdogs.GDT_Location import GDT_Location
 from gdo.ui.GDT_Link import GDT_Link
 from gdo.ui.GDT_Page import GDT_Page
 from gdo.ui.GDT_PageLocation import GDT_PageLocation
