@@ -24,7 +24,7 @@ class module_websocket(GDO_Module):
     def gdo_module_config(self) -> list[GDT]:
         return [
             GDT_Host('ws_host').not_null().initial('127.0.0.1'),
-            GDT_Port('ws_port').not_null().initial('61221'),
+            GDT_Port('ws_port').not_null().initial('6122'),
             GDT_Bool('ws_tls').not_null().initial('0'),
             GDT_Path('ws_tls_key').existing_file(),
             GDT_Path('ws_tls_cert').existing_file(),
