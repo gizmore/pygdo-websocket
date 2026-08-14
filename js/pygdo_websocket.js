@@ -9,7 +9,7 @@ window.gdo.ws = {
     proto: null,
 
     gdo_init: function() {
-        window.gdo.fetch('websocket', 'protocol').then(function(data) {
+        window.gdo.fetch('websocket.protocol.json').then(function(data) {
             window.gdo.ws.init();
         });
     },
