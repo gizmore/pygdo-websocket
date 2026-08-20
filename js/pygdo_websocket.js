@@ -32,8 +32,7 @@ window.gdo.ws = {
 
     connect: function() {
         const proto = window.gdo.ws.tls ? 'wss' : 'ws';
-//        const wsUri = proto + "://" + window.gdo.ws.ip + ":" + window.gdo.ws.port + "/";
-        const wsUri = proto + "://" + "py.giz.org:" + window.gdo.ws.port;
+        const wsUri = proto + "://" + window.gdo.ws.ip + ":" + window.gdo.ws.port;
         const ws = window.gdo.ws.ws = new WebSocket(wsUri);
         ws.addEventListener("open", () => {
             if(window.gdo.ws.connecting) {
