@@ -31,6 +31,10 @@ window.gdo.ws = {
     },
 
     connect: function() {
+        const current = window.gdo.ws.ws;
+        if (current && (current.readyState === WebSocket.CONNECTING || current.readyState === WebSocket.OPEN)) {
+            return;
+        }
         const proto = window.gdo.ws.tls ? 'wss' : 'ws';
         const wsUri = proto + "://" + window.gdo.ws.ip + ":" + window.gdo.ws.port;
         const ws = window.gdo.ws.ws = new WebSocket(wsUri);
@@ -39,11 +43,13 @@ window.gdo.ws = {
                 clearTimeout(window.gdo.ws.connecting);
             }
             window.gdo.ws.connecting = null;
-            window.gdo.ws.sendAuth();
+            window.gdo.ws.sendAuth(ws);
         });
         ws.addEventListener("close", () => {
-            window.gdo.ws.ws = null;
-            window.gdo.ws.connect();
+            if (window.gdo.ws.ws === ws) {
+                window.gdo.ws.ws = null;
+                window.gdo.ws.connect();
+            }
         });
         ws.addEventListener("message", (e) => {
             let log = document.getElementById('ws_log');
@@ -58,17 +64,23 @@ window.gdo.ws = {
             console.error(e)
         });
     },
-    sendAuth: function() {
-        window.gdo.ws.send(window.gdo.ws.cookie);
+    sendAuth: function(ws) {
+        window.gdo.ws.send(window.gdo.ws.cookie, ws);
     },
-    send: function(data) {
+    send: function(data, ws) {
         let log = document.getElementById('ws_log');
         if(log) {
             log.innerText += " > "
             log.innerText += data;
             log.innerText += "\n";
         }
-        window.gdo.ws.ws.send(data);
+        ws = ws || window.gdo.ws.ws;
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            console.warn('WebSocket is not open; message was not sent.');
+            return false;
+        }
+        ws.send(data);
+        return true;
     },
 
 };
