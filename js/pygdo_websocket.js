@@ -8,6 +8,19 @@ window.gdo.ws = {
     connecting: null,
     proto: null,
 
+    appendLog: function(log, text) {
+        if(log) {
+            log.textContent += String(text).replace(/(?:\r\n|\r|\n)+$/, '') + "\n";
+        }
+    },
+
+    appendRenderedLog: function(log, html) {
+        if(log) {
+            log.insertAdjacentHTML('beforeend', String(html).replace(/(?:\r\n|\r|\n)+$/, ''));
+            log.appendChild(document.createTextNode("\n"));
+        }
+    },
+
     gdo_init: function() {
         window.gdo.fetch('websocket.protocol.json').then(function(data) {
             window.gdo.ws.init();
@@ -16,7 +29,8 @@ window.gdo.ws = {
 
     init: function() {
         let submit = document.getElementById('gdo.websocket.method.raw.raw_submit');
-        if(submit) {
+        if(submit && !submit.dataset.gdoWebsocketBound) {
+            submit.dataset.gdoWebsocketBound = '1';
             submit.addEventListener('click', function(e) {
                 e.preventDefault();
                 let line = document.getElementById('ws_cmdline');
@@ -54,8 +68,7 @@ window.gdo.ws = {
         ws.addEventListener("message", (e) => {
             let log = document.getElementById('ws_log');
             if(log) {
-                log.innerHTML += e.data;
-                log.innerHTML += "\n";
+                window.gdo.ws.appendRenderedLog(log, e.data);
             } else {
                  console.log(e.data);
             }
@@ -70,9 +83,7 @@ window.gdo.ws = {
     send: function(data, ws) {
         let log = document.getElementById('ws_log');
         if(log) {
-            log.innerText += " > "
-            log.innerText += data;
-            log.innerText += "\n";
+            window.gdo.ws.appendLog(log, " > " + data);
         }
         ws = ws || window.gdo.ws.ws;
         if (!ws || ws.readyState !== WebSocket.OPEN) {

@@ -72,6 +72,35 @@ class Websocket(Connector):
         wsh: WebSocketHandler = address['handler']
         Application.init_thread(threading.current_thread())
 
+    def get_or_create_connector_user(self, session_user: GDO_User) -> GDO_User:
+        """Return the WebSocket identity linked to one authenticated web user.
+
+        A browser session belongs to the Web account, while its live socket is
+        a distinct connector.  Keeping that distinction makes reply routing
+        deterministic: IBDES can emit ``name{ws}`` and ``say.to`` reaches the
+        active socket instead of the Web connector's intentional stub.
+        """
+        user = self._server.get_user_by_name(session_user.get_name())
+        if user:
+            return user
+        user = GDO_User.blank({
+            'user_type': session_user.get_user_type(),
+            'user_name': session_user.get_name(),
+            'user_displayname': session_user.get_displayname(),
+            'user_server': self._server.get_id(),
+            'user_link': session_user.get_id(),
+        }).insert()
+        self._server._users[user.get_name()] = user
+        return user
+
+    @staticmethod
+    def authenticated_session_user(session: GDO_Session) -> GDO_User | None:
+        """Return a valid logged-in session user, never a default/guest session."""
+        user = session.get_user()
+        if not session.is_persisted() or not user.is_persisted() or not user.is_authenticated():
+            return None
+        return user
+
     def client_left(self, address, ws):
         Logger.debug(f'Client left: {address}')
         wsh: WebSocketHandler = address['handler']
@@ -85,7 +114,13 @@ class Websocket(Connector):
         Application.init_thread(threading.current_thread())
         if not hasattr(wsh, 'gdo_user'):
             session = GDO_Session.for_cookie(msg, False)
-            user = session.get_user()
+            session_user = self.authenticated_session_user(session)
+            if session_user is None:
+                Logger.warning('Rejected WebSocket client without an authenticated session.')
+                wsh.send_close(1008, b'Authentication required')
+                return
+            user = self.get_or_create_connector_user(session_user)
+            user._authenticated = session_user._authenticated
             Application.set_current_user(user)
             wsh.gdo_user = user
             user._network_user = wsh
