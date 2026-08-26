@@ -10,7 +10,9 @@ window.gdo.ws = {
 
     appendLog: function(log, text) {
         if(log) {
-            log.textContent += String(text).replace(/(?:\r\n|\r|\n)+$/, '') + "\n";
+            log.appendChild(document.createTextNode(
+                String(text).replace(/(?:\r\n|\r|\n)+$/, '') + "\n"
+            ));
         }
     },
 
