@@ -22,6 +22,9 @@ window.gdo.ws = {
     },
 
     gdo_init: function() {
+        if (!document.getElementById('ws_log')) {
+            return;
+        }
         window.gdo.fetch('websocket.protocol.json').then(function(data) {
             window.gdo.ws.init();
         });
@@ -59,10 +62,19 @@ window.gdo.ws = {
             window.gdo.ws.connecting = null;
             window.gdo.ws.sendAuth(ws);
         });
-        ws.addEventListener("close", () => {
+        ws.addEventListener("close", (event) => {
             if (window.gdo.ws.ws === ws) {
                 window.gdo.ws.ws = null;
-                window.gdo.ws.connect();
+                if (event.code === 1008) {
+                    console.warn('WebSocket authentication is required; reconnect disabled.');
+                    return;
+                }
+                if (!window.gdo.ws.connecting) {
+                    window.gdo.ws.connecting = setTimeout(() => {
+                        window.gdo.ws.connecting = null;
+                        window.gdo.ws.connect();
+                    }, 60000);
+                }
             }
         });
         ws.addEventListener("message", (e) => {

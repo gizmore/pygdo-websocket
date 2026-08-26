@@ -95,9 +95,9 @@ class Websocket(Connector):
 
     @staticmethod
     def authenticated_session_user(session: GDO_Session) -> GDO_User | None:
-        """Return a valid logged-in session user, never a default/guest session."""
+        """Return a valid session-bound guest or member, never an anonymous session."""
         user = session.get_user()
-        if not session.is_persisted() or not user.is_persisted() or not user.is_authenticated():
+        if not session.is_persisted() or not user.is_persisted() or not user.is_user():
             return None
         return user
 
@@ -116,7 +116,7 @@ class Websocket(Connector):
             session = GDO_Session.for_cookie(msg, False)
             session_user = self.authenticated_session_user(session)
             if session_user is None:
-                Logger.warning('Rejected WebSocket client without an authenticated session.')
+                Logger.message('Rejected WebSocket client without an authenticated session.')
                 wsh.send_close(1008, b'Authentication required')
                 return
             user = self.get_or_create_connector_user(session_user)

@@ -86,7 +86,5 @@ class module_websocket(GDO_Module):
 
     def gdo_init_sidebar(self, page: 'GDT_Page'):
         self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_client_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_client_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_client_port()) + ";\nwindow.gdo.ws.cookie = '" + Application.get_cookie(GDO_Session.COOKIE_NAME) + "';")
-        if self.cfg_auto_connect() and GDO_User.current().is_user():
-            self.autoconnect_script()
         if self.get_config_value('ws_raw'):
             self.get_config_value('ws_raw_location').add_field(GDT_Link().href(self.href('raw')).text('module_websocket'))

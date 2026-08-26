@@ -15,6 +15,9 @@ class raw(MethodForm):
     def gdo_trigger(cls) -> str:
         return ''
 
+    def gdo_user_type(self) -> str | None:
+        return 'guest,member'
+
     def gdo_create_form(self, form: GDT_Form) -> None:
         form.text('info_websocket_raw')
         form.add_fields(
@@ -30,4 +33,3 @@ class raw(MethodForm):
 
     def form_submitted(self) -> GDT:
         return self.msg('msg_ws_raw_sent')
-    
