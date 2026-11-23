@@ -1,3 +1,5 @@
+import json
+
 from gdo.base.Application import Application
 from gdo.base.GDO_Module import GDO_Module
 from gdo.base.GDT import GDT
@@ -85,6 +87,8 @@ class module_websocket(GDO_Module):
         self.add_js_inline("window.gdo.ws.init();")
 
     def gdo_init_sidebar(self, page: 'GDT_Page'):
-        self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_client_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_client_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_client_port()) + ";\nwindow.gdo.ws.cookie = '" + Application.get_cookie(GDO_Session.COOKIE_NAME) + "';")
+        cookie_name = Application.config('sess.name', GDO_Session.COOKIE_NAME) or GDO_Session.COOKIE_NAME
+        cookie = json.dumps(Application.get_cookie(cookie_name)).replace('<', '\\u003c')
+        self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_client_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_client_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_client_port()) + ";\nwindow.gdo.ws.cookie = " + cookie + ";")
         if self.get_config_value('ws_raw'):
             self.get_config_value('ws_raw_location').add_field(GDT_Link().href(self.href('raw')).text('module_websocket'))

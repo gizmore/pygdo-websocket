@@ -92,7 +92,9 @@ window.gdo.ws = {
         });
     },
     sendAuth: function(ws) {
-        window.gdo.ws.send(window.gdo.ws.cookie, ws);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(window.gdo.ws.cookie);
+        }
     },
     send: function(data, ws) {
         let log = document.getElementById('ws_log');
