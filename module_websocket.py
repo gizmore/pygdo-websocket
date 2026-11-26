@@ -95,4 +95,4 @@ class module_websocket(GDO_Module):
         cookie = json.dumps(Application.get_cookie(cookie_name)).replace('<', '\\u003c')
         self.add_js_inline("window.gdo.ws.tls = " + str(int(self.cfg_client_tls())) +";\nwindow.gdo.ws.ip = '" + self.cfg_client_host() + "';\nwindow.gdo.ws.port = " + str(self.cfg_client_port()) + ";\nwindow.gdo.ws.cookie = " + cookie + ";")
         if self.get_config_value('ws_raw'):
-            self.get_config_value('ws_raw_location').add_field(GDT_Link().href(self.href('raw')).text('module_websocket'))
+            self.get_config_value('ws_raw_location').add_field(GDT_Link().href(self.href('raw')).text('module_websocket').icon('plug'))
