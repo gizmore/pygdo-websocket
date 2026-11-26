@@ -33,17 +33,15 @@ window.gdo.ws = {
     },
 
     init: function() {
-        let submit = document.getElementById('gdo.websocket.method.raw.raw_submit');
-        if(submit && !submit.dataset.gdoWebsocketBound) {
-            submit.dataset.gdoWebsocketBound = '1';
-            submit.addEventListener('click', function(e) {
+        const line = document.getElementById('ws_cmdline');
+        const form = line && line.form;
+        if(form && !form.dataset.gdoWebsocketBound) {
+            form.dataset.gdoWebsocketBound = '1';
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                let line = document.getElementById('ws_cmdline');
-                if(line) {
-                    gdo.ws.send(line.value)
+                if(line && line.value.trim() && gdo.ws.send(line.value)) {
                     line.value = '';
                 }
-                return false;
             });
         }
         window.gdo.ws.connect();
@@ -98,15 +96,14 @@ window.gdo.ws = {
     },
     send: function(data, ws) {
         let log = document.getElementById('ws_log');
-        if(log) {
-            window.gdo.ws.appendLog(log, " > " + data);
-        }
         ws = ws || window.gdo.ws.ws;
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             console.warn('WebSocket is not open; message was not sent.');
+            window.gdo.ws.appendLog(log, 'Not connected; command was not sent.');
             return false;
         }
         ws.send(data);
+        window.gdo.ws.appendLog(log, " > " + data);
         return true;
     },
 
