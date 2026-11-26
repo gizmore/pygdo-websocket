@@ -39,7 +39,10 @@ window.gdo.ws = {
             form.dataset.gdoWebsocketBound = '1';
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                if(line && line.value.trim() && gdo.ws.send(line.value)) {
+                const allToAL = document.getElementById('ws_all_to_al');
+                const text = line && line.value;
+                const message = allToAL && allToAL.value === '1' ? 'mira: ' + text : text;
+                if(text && text.trim() && gdo.ws.send(message)) {
                     line.value = '';
                 }
             });
