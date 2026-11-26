@@ -9,12 +9,11 @@ test('form submission sends once, retaining commands while disconnected', () => 
         assert.equal(name, 'submit'); onSubmit = handler;
     }};
     const line = {form, value: '$servers'};
-    const allToAL = {value: '0'};
     const output = [];
     const log = {appendChild: node => output.push(node)};
     const socket = {readyState: 1, send: text => output.push('sent:' + text)};
     const document = {
-        getElementById: id => id === 'ws_cmdline' ? line : id === 'ws_all_to_al' ? allToAL : id === 'ws_log' ? log : null,
+        getElementById: id => id === 'ws_cmdline' ? line : id === 'ws_log' ? log : null,
         createTextNode: text => text,
     };
     const window = {gdo: {}};
@@ -28,11 +27,9 @@ test('form submission sends once, retaining commands while disconnected', () => 
     assert.equal(prevented, true);
     assert.equal(line.value, '');
     assert.deepEqual(output, ['sent:$servers', ' > $servers\n']);
-    allToAL.value = '1';
     line.value = 'hello duck';
     onSubmit({preventDefault() {}});
-    assert.equal(output.at(-2), 'sent:mira: hello duck');
-    allToAL.value = '0';
+    assert.equal(output.at(-2), 'sent:hello duck');
     line.value = '$help';
     socket.readyState = 3;
     onSubmit({preventDefault() {}});

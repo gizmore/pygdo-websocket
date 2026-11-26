@@ -35,6 +35,7 @@ class module_websocket(GDO_Module):
             GDT_Bool('ws_client_tls').not_null().initial('1'),
             GDT_Bool('ws_autoconnect').not_null().initial('1'),
             GDT_Bool('ws_raw').not_null().initial('1'),
+            GDT_Bool('ws_mira_comment_commands').not_null().initial('0').tooltip('tt_ws_mira_comment_commands'),
             GDT_PageLocation('ws_raw_location').initial('_left_bar'),
         ]
 
@@ -64,6 +65,9 @@ class module_websocket(GDO_Module):
 
     def cfg_auto_connect(self) -> bool:
         return self.get_config_value('ws_autoconnect')
+
+    def cfg_mira_comment_commands(self) -> bool:
+        return bool(self.get_config_value('ws_mira_comment_commands'))
 
     ########
     # Init #

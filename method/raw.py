@@ -1,7 +1,6 @@
 from gdo.base.Application import Application
 from gdo.base.GDT import GDT
 from gdo.core.GDT_Container import GDT_Container
-from gdo.core.GDT_Bool import GDT_Bool
 from gdo.core.GDT_String import GDT_String
 from gdo.core.GDT_Text import GDT_Text
 from gdo.form.GDT_Form import GDT_Form
@@ -23,7 +22,6 @@ class raw(MethodForm):
         form.text('info_websocket_raw')
         form.add_fields(
             GDT_String('ws_cmdline').not_null(),
-            GDT_Bool('ws_all_to_al').initial('0'),
         )
         super().gdo_create_form(form)
 

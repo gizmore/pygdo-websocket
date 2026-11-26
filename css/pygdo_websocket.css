@@ -1,3 +1,12 @@
  #ws_log {
     white-space: pre-wrap;
  }
+
+/* Server-rendered HTML must not inherit the log's preformatted whitespace. */
+#ws_log :not(pre):not(code) {
+    white-space: normal;
+}
+
+#ws_log pre, #ws_log code {
+    white-space: pre-wrap;
+}
